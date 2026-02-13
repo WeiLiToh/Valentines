@@ -58,7 +58,7 @@
     .bgOverlay{
       position:absolute;
       inset:0;
-      background: rgba(255,240,246,.70);
+      background: rgba(255,240,246,.45);
       backdrop-filter: blur(2px);
     }
 
@@ -368,7 +368,7 @@ Happy Valentine’s Day 💗`;
 
       let idx = 0;
       function show(i) {
-        imgs.forEach((im, k) => im.style.opacity = (k === i ? "0.18" : "0"));
+        imgs.forEach((im, k) => im.style.opacity = (k === i ? "0.35" : "0"));
       }
       show(idx);
 
