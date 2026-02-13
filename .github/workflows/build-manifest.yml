@@ -1,0 +1,44 @@
+name: Build photo manifest
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build manifest.json from /photos
+        run: |
+          python3 - <<'PY'
+          import os, json
+
+          exts = {".jpg",".jpeg",".png",".webp",".gif"}
+          photos_dir = "photos"
+
+          files = []
+          if os.path.isdir(photos_dir):
+            for name in sorted(os.listdir(photos_dir)):
+              if os.path.splitext(name.lower())[1] in exts:
+                files.append(name)
+
+          with open("manifest.json", "w", encoding="utf-8") as f:
+            json.dump(files, f, indent=2)
+
+          print("Wrote manifest.json with", len(files), "files")
+          PY
+
+      - name: Commit manifest.json (if changed)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add manifest.json
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: update manifest"
+          git push
