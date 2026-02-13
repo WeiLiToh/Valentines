@@ -21,9 +21,10 @@
       min-height:100vh;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
-      background: radial-gradient(1200px 800px at 20% 10%, var(--bg2), transparent 60%),
-                  radial-gradient(1200px 800px at 80% 30%, #ffd6ff, transparent 55%),
-                  linear-gradient(180deg, var(--bg1), #fff);
+      background:
+        radial-gradient(1200px 800px at 20% 10%, var(--bg2), transparent 60%),
+        radial-gradient(1200px 800px at 80% 30%, #ffd6ff, transparent 55%),
+        linear-gradient(180deg, var(--bg1), #fff);
       display:flex;
       align-items:center;
       justify-content:center;
@@ -31,9 +32,40 @@
       overflow-x:hidden;
     }
 
+    /* Faded photo background shown after YES */
+    .bgPhotos{
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .45s ease;
+      overflow: hidden;
+    }
+    .bgPhotos.on{ opacity: 1; }
+
+    .bgPhotos img{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      filter: blur(6px) saturate(1.05);
+      opacity: 0;
+      transform: scale(1.03);
+      transition: opacity 1.2s ease;
+    }
+    .bgOverlay{
+      position:absolute;
+      inset:0;
+      background: rgba(255,240,246,.70);
+      backdrop-filter: blur(2px);
+    }
+
     .wrap{
       width:min(980px, 100%);
       position:relative;
+      z-index: 2; /* above background */
     }
 
     .panel{
@@ -51,7 +83,6 @@
       gap:18px;
       align-items:center;
     }
-
     @media (max-width: 760px){
       .hero{ grid-template-columns: 1fr; }
     }
@@ -66,6 +97,8 @@
       margin:0 0 18px;
       opacity:.85;
       font-size: 16px;
+      line-height: 1.5;
+      white-space: pre-line;
     }
 
     .btnrow{
@@ -96,10 +129,9 @@
       background: rgba(255, 255, 255, .9);
       border:1px solid rgba(0,0,0,.08);
     }
-    .hint{
-      font-size: 13px;
-      opacity:.75;
-      margin-top:10px;
+    .letterBtn{
+      background: rgba(255,255,255,.92);
+      border:1px solid rgba(0,0,0,.08);
     }
 
     .art{
@@ -116,7 +148,6 @@
       align-items:center;
       justify-content:center;
     }
-
     .heart{
       font-size: 92px;
       filter: drop-shadow(0 12px 18px rgba(255,77,109,.25));
@@ -132,23 +163,21 @@
       margin-top:18px;
       display:none;
     }
-
-    .card{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
+    .fadeIn{ animation: fadeIn .5s ease both; }
+    @keyframes fadeIn{
+      from{ opacity:0; transform: translateY(6px); }
+      to{ opacity:1; transform: translateY(0); }
     }
 
     .vcard{
       padding: 18px;
       border-radius: var(--radius);
-      background: rgba(255,255,255,.9);
+      background: rgba(255,255,255,.92);
       border:1px solid rgba(255, 77, 109, .18);
       box-shadow: 0 10px 22px rgba(0,0,0,.08);
       position:relative;
       overflow:hidden;
     }
-
     .vcard h2{
       margin:0 0 8px;
       font-size: clamp(22px, 3.4vw, 34px);
@@ -158,43 +187,75 @@
       font-size: 16px;
       line-height:1.6;
       opacity:.92;
-    }
-    .tiny{
-      margin-top:10px;
-      font-size: 12px;
-      opacity:.65;
+      white-space: pre-line;
     }
 
-    .gallery{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    /* No-click crying gif */
+    .sadBox{
+      display:none;
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(0,0,0,.08);
+      box-shadow: 0 10px 22px rgba(0,0,0,.06);
+      align-items:center;
       gap: 12px;
     }
+    .sadBox.on{ display:flex; }
+    .sadBox img{
+      width: 92px;
+      height: 92px;
+      object-fit: contain;
+      border-radius: 16px;
+      background: rgba(0,0,0,.03);
+    }
+    .sadText{
+      line-height:1.35;
+      opacity:.9;
+      font-size: 14px;
+    }
 
-    .ph{
-      border-radius: 18px;
-      overflow:hidden;
-      background: rgba(255,255,255,.8);
-      border:1px solid rgba(0,0,0,.06);
-      box-shadow: 0 10px 20px rgba(0,0,0,.06);
+    /* Letter modal */
+    .modalBack{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 60;
+    }
+    .modalBack.on{ display:flex; }
+    .modal{
+      width: min(720px, 100%);
+      background: rgba(255,255,255,.96);
+      border-radius: 22px;
+      border: 1px solid rgba(0,0,0,.08);
+      box-shadow: 0 18px 60px rgba(0,0,0,.22);
+      padding: 18px;
       position:relative;
     }
-    .ph img{
-      width:100%;
-      height: 220px;
-      object-fit: cover;
-      display:block;
+    .modal h3{
+      margin: 0 0 10px;
+      font-size: 22px;
     }
-    .ph span{
+    .modal .letter{
+      white-space: pre-line;
+      line-height: 1.7;
+      font-size: 16px;
+      opacity: .95;
+    }
+    .close{
       position:absolute;
-      left:10px;
-      bottom:10px;
-      font-size: 12px;
-      padding: 6px 10px;
+      top: 10px;
+      right: 10px;
       border-radius: 999px;
-      background: rgba(255,255,255,.85);
-      border:1px solid rgba(0,0,0,.06);
-      backdrop-filter: blur(6px);
+      padding: 10px 12px;
+      background: rgba(0,0,0,.06);
+      border: 1px solid rgba(0,0,0,.08);
+      font-weight: 700;
     }
 
     /* Confetti canvas */
@@ -202,20 +263,14 @@
       position:fixed;
       inset:0;
       pointer-events:none;
-      z-index: 50;
-    }
-
-    /* Cute fade */
-    .fadeIn{
-      animation: fadeIn .5s ease both;
-    }
-    @keyframes fadeIn{
-      from{ opacity:0; transform: translateY(6px); }
-      to{ opacity:1; transform: translateY(0); }
+      z-index: 55;
     }
   </style>
 </head>
 <body>
+  <!-- background photos -->
+  <div id="bgPhotos" class="bgPhotos" aria-hidden="true"></div>
+
   <canvas id="confetti"></canvas>
 
   <div class="wrap">
@@ -229,7 +284,13 @@
           <button class="no" id="noBtn">No 🙈</button>
         </div>
 
-        <div class="hint" id="hint">Tip: the “No” button might be… shy 😅</div>
+        <div id="sadBox" class="sadBox" aria-live="polite">
+          <img src="assets/dedenne.gif" alt="crying gif" />
+          <div class="sadText">
+            Aww… 😭<br/>
+            Are you sure? (You can still press “Yes” 💗)
+          </div>
+        </div>
       </div>
 
       <div class="art" aria-hidden="true">
@@ -238,95 +299,127 @@
     </section>
 
     <section class="panel fadeIn" id="reveal">
-      <div class="card">
-        <div class="vcard">
-          <h2>Happy Valentine’s Day 💝</h2>
-          <p id="message">
-            I’m really happy we’re together. Thank you for being you.
-            Here are some of my favorite moments of us 🥰
-          </p>
-          <div class="tiny" id="signature">— from me to you 💌</div>
-        </div>
+      <div class="vcard">
+        <h2>Happy Valentine’s Day 💝</h2>
+        <p id="afterYesText">Yay!! I’m so happy 💕</p>
 
-        <div class="gallery" id="gallery"></div>
+        <div class="btnrow" style="margin-top:14px;">
+          <button class="letterBtn" id="openLetter">Read Valentine’s Letter 💌</button>
+        </div>
       </div>
     </section>
   </div>
 
+  <!-- Letter modal -->
+  <div id="modalBack" class="modalBack" role="dialog" aria-modal="true" aria-label="Valentine letter">
+    <div class="modal">
+      <button class="close" id="closeLetter">✕</button>
+      <h3>To my Valentine 💌</h3>
+      <div class="letter" id="letterText"></div>
+    </div>
+  </div>
+
   <script>
-    // ====== Customize these ======
-    const PHOTO_FILES = [
-      // Put your images in /photos and list them here:
-      "1.jpg",
-      "2.jpg",
-      "3.jpg",
-      "4.jpg",
-      "5.jpg",
-    ];
+    // ========= Customize text here =========
+    const AFTER_YES_TEXT =
+`Yay!! I’m so happy 💕
+I prepared something for you — look at the background 🥰`;
 
-    // Optional: edit the card text
-    const CARD_MESSAGE = `I’m really happy we’re together. Thank you for being you.
-Here are some of my favorite moments of us 🥰`;
+    const LETTER =
+`Hi love,
 
-    const SIGNATURE = "— from me to you 💌";
+(Write your message here.)
+Thank you for being you.
+I’m really grateful for you, and I can’t wait to make more memories together.
 
-    // ====== Page logic ======
+Happy Valentine’s Day 💗`;
+
+    // ========= Helpers: load manifest.json =========
+    async function loadManifest() {
+      const res = await fetch("manifest.json", { cache: "no-store" });
+      if (!res.ok) return [];
+      const files = await res.json();
+      return Array.isArray(files) ? files : [];
+    }
+
+    // ========= Background photo slideshow =========
+    async function startBackgroundPhotos() {
+      const files = await loadManifest();
+      if (!files.length) return;
+
+      const bg = document.getElementById("bgPhotos");
+      bg.innerHTML = "";
+
+      // Pick up to 8 photos for the background cycle
+      const picks = files.slice(-8); // last 8 (often newest)
+      const imgs = picks.map((f) => {
+        const img = document.createElement("img");
+        img.src = `photos/${f}`;
+        bg.appendChild(img);
+        return img;
+      });
+
+      // overlay to keep it soft + readable
+      const overlay = document.createElement("div");
+      overlay.className = "bgOverlay";
+      bg.appendChild(overlay);
+
+      bg.classList.add("on");
+
+      let idx = 0;
+      function show(i) {
+        imgs.forEach((im, k) => im.style.opacity = (k === i ? "0.18" : "0"));
+      }
+      show(idx);
+
+      // rotate every 3.2s
+      setInterval(() => {
+        idx = (idx + 1) % imgs.length;
+        show(idx);
+      }, 3200);
+    }
+
+    // ========= Main UI logic =========
     const ask = document.getElementById("ask");
     const reveal = document.getElementById("reveal");
     const yesBtn = document.getElementById("yesBtn");
     const noBtn = document.getElementById("noBtn");
-    const btnrow = document.getElementById("btnrow");
-    const hint = document.getElementById("hint");
-    const gallery = document.getElementById("gallery");
-    const message = document.getElementById("message");
-    const signature = document.getElementById("signature");
+    const sadBox = document.getElementById("sadBox");
 
-    message.textContent = CARD_MESSAGE;
-    signature.textContent = SIGNATURE;
+    const openLetter = document.getElementById("openLetter");
+    const modalBack = document.getElementById("modalBack");
+    const closeLetter = document.getElementById("closeLetter");
 
-    function buildGallery() {
-      gallery.innerHTML = "";
-      PHOTO_FILES.forEach((f, i) => {
-        const wrap = document.createElement("div");
-        wrap.className = "ph";
-        const img = document.createElement("img");
-        img.src = `photos/${f}`;
-        img.loading = "lazy";
-        img.alt = `photo ${i+1}`;
-        const tag = document.createElement("span");
-        tag.textContent = `💕 ${i+1}`;
-        wrap.appendChild(img);
-        wrap.appendChild(tag);
-        gallery.appendChild(wrap);
-      });
-    }
+    document.getElementById("afterYesText").textContent = AFTER_YES_TEXT;
+    document.getElementById("letterText").textContent = LETTER;
 
-    // Make the "No" button run away (cute but not too annoying)
-    function dodge() {
-      const rect = btnrow.getBoundingClientRect();
-      const maxX = Math.max(0, rect.width - noBtn.offsetWidth);
-      const maxY = 60;
+    noBtn.addEventListener("click", () => {
+      sadBox.classList.add("on");
+    });
 
-      const x = Math.random() * maxX;
-      const y = (Math.random() * maxY) - 10;
-
-      noBtn.style.position = "relative";
-      noBtn.style.left = `${x}px`;
-      noBtn.style.top = `${y}px`;
-
-      hint.textContent = "Hehe… try ‘Yes’ 😇";
-    }
-
-    noBtn.addEventListener("mouseenter", dodge);
-    noBtn.addEventListener("click", dodge);
-
-    yesBtn.addEventListener("click", () => {
+    yesBtn.addEventListener("click", async () => {
       ask.style.display = "none";
       reveal.style.display = "block";
       startConfetti(1600);
+      startBackgroundPhotos();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-    // ====== Confetti ======
+    openLetter.addEventListener("click", () => {
+      modalBack.classList.add("on");
+    });
+    function closeModal(){
+      modalBack.classList.remove("on");
+    }
+    closeLetter.addEventListener("click", closeModal);
+    modalBack.addEventListener("click", (e) => {
+      if (e.target === modalBack) closeModal();
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    });
+
+    // ========= Confetti =========
     const canvas = document.getElementById("confetti");
     const ctx = canvas.getContext("2d");
     let pieces = [];
@@ -366,17 +459,14 @@ Here are some of my favorite moments of us 🥰`;
           p.a += p.va;
           p.vy += 0.02;
 
-          // simple wrap
           if (p.y > H + 40) { p.y = -30; p.vy = 2 + Math.random() * 4; }
           if (p.x < -40) p.x = W + 40;
           if (p.x > W + 40) p.x = -40;
 
-          // draw "confetti" as little rotated rectangles
           ctx.save();
           ctx.translate(p.x, p.y);
           ctx.rotate(p.a);
           ctx.globalAlpha = 0.9;
-          // no fixed colors: just pick from a small palette
           const palette = ["#ff4d6d","#ff8fab","#ffd6ff","#fff1a8","#bde0fe"];
           ctx.fillStyle = palette[(p.t * palette.length) | 0];
           ctx.fillRect(-p.r, -p.r/2, p.r*2, p.r);
@@ -386,11 +476,8 @@ Here are some of my favorite moments of us 🥰`;
         if (elapsed < ms) anim = requestAnimationFrame(frame);
         else ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
-
       anim = requestAnimationFrame(frame);
     }
   </script>
-  <script src="app.js"></script>
-
 </body>
 </html>
