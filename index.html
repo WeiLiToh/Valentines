@@ -321,11 +321,9 @@ Here are some of my favorite moments of us 🥰`;
     noBtn.addEventListener("click", dodge);
 
     yesBtn.addEventListener("click", () => {
-      buildGallery();
       ask.style.display = "none";
       reveal.style.display = "block";
       startConfetti(1600);
-      window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
     // ====== Confetti ======
@@ -392,5 +390,7 @@ Here are some of my favorite moments of us 🥰`;
       anim = requestAnimationFrame(frame);
     }
   </script>
+  <script src="app.js"></script>
+
 </body>
 </html>
