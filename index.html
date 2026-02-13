@@ -32,7 +32,7 @@
       overflow-x:hidden;
     }
 
-    /* Background photos shown after YES (2x2 grid) */
+    /* Background photos shown after YES */
     .bgPhotos{
       position: fixed;
       inset: 0;
@@ -44,14 +44,35 @@
     }
     .bgPhotos.on{ opacity: 1; }
 
-    .bgGrid{
+    /* Two side grids: LEFT | CENTER (card space) | RIGHT */
+    .bgGrids{
       position:absolute;
       inset:0;
       display:grid;
+      grid-template-columns: 1fr min(980px, 100%) 1fr;
+      align-items:center;
+      gap: 22px;
+      padding: 22px;
+    }
+
+    /* On smaller screens, just show one grid (behind everything) */
+    @media (max-width: 900px){
+      .bgGrids{
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .bgGridSide{
+      display:grid;
       grid-template-columns: 1fr 1fr;
       grid-template-rows: 1fr 1fr;
-      gap: 18px;
-      padding: 22px;
+      gap: 16px;
+      height: min(78vh, 720px);
+    }
+    @media (max-width: 900px){
+      .bgGridSide{
+        height: min(70vh, 560px);
+      }
     }
 
     .bgCell{
@@ -65,18 +86,18 @@
     .bgCell img{
       width:100%;
       height:100%;
-      object-fit: contain;   /* show full image */
-      background: rgba(255,255,255,.25); /* fills the empty bars nicely */
+      object-fit: contain;          /* show full image */
+      background: rgba(255,255,255,.22);
       display:block;
-      filter: saturate(1.08) contrast(1.06);
-      opacity: .62;              /* adjust: 0.45–0.75 */
-      transform: scale(1.02);
+      filter: saturate(1.05) contrast(1.03);
+      opacity: .75;                /* adjust 0.55–0.90 */
+      transform: scale(1.01);
     }
 
     .bgOverlay{
       position:absolute;
       inset:0;
-      background: rgba(255,240,246,.18); /* adjust: 0.10–0.30 */
+      background: rgba(255,240,246,.14); /* adjust 0.08–0.22 */
       backdrop-filter: blur(1px);
     }
 
@@ -103,7 +124,6 @@
     }
     @media (max-width: 760px){
       .hero{ grid-template-columns: 1fr; }
-      .bgGrid{ gap: 12px; padding: 14px; }
     }
 
     h1{
@@ -211,6 +231,22 @@
       line-height:1.6;
       opacity:.92;
       white-space: pre-line;
+    }
+
+    /* Gif after YES (Espurr) */
+    .yesGifWrap{
+      margin-top: 14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .yesGif{
+      width: min(260px, 70vw);
+      height: auto;
+      border-radius: 18px;
+      background: rgba(0,0,0,.03);
+      border: 1px solid rgba(0,0,0,.08);
+      box-shadow: 0 10px 22px rgba(0,0,0,.08);
     }
 
     /* No-click crying gif */
@@ -326,6 +362,11 @@
         <h2>Happy Valentine’s Day 💝</h2>
         <p id="afterYesText">Yay!! I’m so happy 💕</p>
 
+        <!-- Espurr gif after YES -->
+        <div class="yesGifWrap">
+          <img class="yesGif" src="assets/espurr.gif" alt="espurr gif" />
+        </div>
+
         <div class="btnrow" style="margin-top:14px;">
           <button class="letterBtn" id="openLetter">Read Valentine’s Letter 💌</button>
           <button class="muteBtn" id="muteBtn" aria-pressed="false">🔊 Music</button>
@@ -343,25 +384,29 @@
     </div>
   </div>
 
-  <!-- Background music (upload your own file to assets/music.mp3) -->
+  <!-- Background music -->
   <audio id="bgm" preload="auto" loop>
-    <source src="assets/music.mp3" type="audio/mpeg">
+    <source src="assets/replay.mp3" type="audio/mpeg">
   </audio>
 
   <script>
     // ========= Customize text here =========
     const AFTER_YES_TEXT =
-`Yay!! I’m so happy 💕
-I prepared something for you — look at the background 🥰`;
+`Holly IS OBSESSED. I KNEW SHE'D PICK YES HEHE.`;
 
     const LETTER =
-`Hi love,
+`Hi Holly bibi,
 
-(Write your message here.)
-Thank you for being you.
-I’m really grateful for you, and I can’t wait to make more memories together.
+Happy Valentine's Day!!! It's our first valentine together and I hope we can experience many more together hehe (no pressure). 
+I'm really thankful I met you and I can't wait to go on more dates with you. 
+You bring bouts of unbridled excitement to my life, and you are the brush that colors the world around me. 
+A day that goes by without you is a day that brings me heart ache. I just don't know how to quit you Holly. 
+Let's make more memories together (Japan NEXT)!
+Happy Valentine’s Day 💗
 
-Happy Valentine’s Day 💗`;
+With love, 
+
+Wei Li bibi`;
 
     // ========= Helpers: load manifest.json =========
     async function loadManifest() {
@@ -380,7 +425,7 @@ Happy Valentine’s Day 💗`;
       return a;
     }
 
-    // ========= Background photo grid (2x2) =========
+    // ========= Background photo side-grids (Left + Right, 2x2 each) =========
     async function startBackgroundPhotos() {
       const files = await loadManifest();
       if (!files.length) return;
@@ -388,24 +433,40 @@ Happy Valentine’s Day 💗`;
       const bg = document.getElementById("bgPhotos");
       bg.innerHTML = "";
 
-      const grid = document.createElement("div");
-      grid.className = "bgGrid";
-      bg.appendChild(grid);
+      const grids = document.createElement("div");
+      grids.className = "bgGrids";
+      bg.appendChild(grids);
+
+      const left = document.createElement("div");
+      left.className = "bgGridSide";
+      grids.appendChild(left);
+
+      // center spacer keeps the middle clear for your card
+      const centerSpacer = document.createElement("div");
+      centerSpacer.style.height = "1px";
+      grids.appendChild(centerSpacer);
+
+      const right = document.createElement("div");
+      right.className = "bgGridSide";
+      grids.appendChild(right);
 
       const overlay = document.createElement("div");
       overlay.className = "bgOverlay";
       bg.appendChild(overlay);
 
-      const cells = [];
-      for (let i = 0; i < 4; i++) {
+      const imgs = [];
+      function makeCell(parent){
         const cell = document.createElement("div");
         cell.className = "bgCell";
         const img = document.createElement("img");
         img.alt = "background photo";
         cell.appendChild(img);
-        grid.appendChild(cell);
-        cells.push(img);
+        parent.appendChild(cell);
+        imgs.push(img);
       }
+
+      for (let i = 0; i < 4; i++) makeCell(left);
+      for (let i = 0; i < 4; i++) makeCell(right);
 
       bg.classList.add("on");
 
@@ -413,18 +474,18 @@ Happy Valentine’s Day 💗`;
       let idx = 0;
 
       function nextBatch() {
-        if (idx + 4 > pool.length) {
+        if (idx + 8 > pool.length) {
           pool = shuffle(files);
           idx = 0;
         }
-        for (let k = 0; k < 4; k++) {
-          cells[k].src = `photos/${pool[idx + k]}`;
+        for (let k = 0; k < 8; k++) {
+          imgs[k].src = `photos/${pool[idx + k]}`;
         }
-        idx += 4;
+        idx += 8;
       }
 
       nextBatch();
-      setInterval(nextBatch, 4000); // change every 4s
+      setInterval(nextBatch, 4500);
     }
 
     // ========= Main UI logic =========
@@ -455,7 +516,6 @@ Happy Valentine’s Day 💗`;
     }
 
     async function startMusic() {
-      // Browsers allow audio after a user gesture (your YES click counts)
       bgm.volume = 0.6;
       try { await bgm.play(); } catch(e) {}
       setMusicButton();
